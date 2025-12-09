@@ -1,0 +1,241 @@
+data_commessa,cliente,settore,fatturato,margine_pct
+2022-01-15,Stellantis,Automotive,70206.54,14.4
+2022-02-14,Stellantis,Automotive,70423.06,22.3
+2022-03-16,Stellantis,Automotive,79092.93,20.8
+2022-04-15,Stellantis,Automotive,70562.57,23.2
+2022-05-15,Stellantis,Automotive,70837.76,23.2
+2022-06-14,Stellantis,Automotive,63296.27,19.2
+2022-07-14,Stellantis,Automotive,64012.61,23.1
+2022-08-13,Stellantis,Automotive,48047.91,12.7
+2022-09-12,Stellantis,Automotive,79248.01,18.6
+2022-10-12,Stellantis,Automotive,72276.65,17.8
+2022-11-11,Stellantis,Automotive,72797.26,14.2
+2022-12-11,Stellantis,Automotive,105645.48,24.6
+2023-01-10,Stellantis,Automotive,72588.83,15.8
+2023-02-09,Stellantis,Automotive,73612.36,24.9
+2023-03-11,Stellantis,Automotive,87776.16,22.8
+2023-04-10,Stellantis,Automotive,74057.71,24.8
+2023-05-10,Stellantis,Automotive,74014.42,16.9
+2023-06-09,Stellantis,Automotive,69700.88,22.5
+2023-07-09,Stellantis,Automotive,72038.6,15.9
+2023-08-08,Stellantis,Automotive,42468.21,14.0
+2023-09-07,Stellantis,Automotive,75342.39,11.4
+2023-10-07,Stellantis,Automotive,75926.68,21.3
+2023-11-06,Stellantis,Automotive,81504.23,13.4
+2023-12-06,Stellantis,Automotive,105688.08,19.9
+2024-01-05,Stellantis,Automotive,75660.73,16.6
+2024-02-04,Stellantis,Automotive,67605.45,23.4
+2024-03-05,Stellantis,Automotive,75180.51,22.6
+2024-04-04,Stellantis,Automotive,68955.62,11.3
+2024-05-04,Stellantis,Automotive,78664.49,12.0
+2024-06-03,Stellantis,Automotive,68258.84,22.8
+2024-07-03,Stellantis,Automotive,60317.18,14.3
+2024-08-02,Stellantis,Automotive,52669.35,13.6
+2024-09-01,Stellantis,Automotive,82570.4,18.4
+2024-10-01,Stellantis,Automotive,81891.95,17.4
+2024-10-31,Stellantis,Automotive,79931.13,19.1
+2024-11-30,Stellantis,Automotive,81606.39,11.6
+2024-12-30,Stellantis,Automotive,108538.47,13.2
+2025-01-29,Stellantis,Automotive,75178.32,17.1
+2025-02-28,Stellantis,Automotive,74865.63,16.4
+2025-03-30,Stellantis,Automotive,79824.64,11.1
+2025-04-29,Stellantis,Automotive,67614.29,15.4
+2025-05-29,Stellantis,Automotive,86442.03,19.0
+2025-06-28,Stellantis,Automotive,71263.27,23.7
+2025-07-28,Stellantis,Automotive,71619.37,22.9
+2025-08-27,Stellantis,Automotive,48734.21,21.3
+2025-09-26,Stellantis,Automotive,82976.07,19.4
+2025-10-26,Stellantis,Automotive,80079.12,14.8
+2025-11-25,Stellantis,Automotive,76800.09,20.9
+2022-01-15,Leonardo,Aerospace,43409.5,16.1
+2022-02-14,Leonardo,Aerospace,43435.57,20.2
+2022-03-16,Leonardo,Aerospace,44833.32,20.6
+2022-04-15,Leonardo,Aerospace,46410.52,23.9
+2022-05-15,Leonardo,Aerospace,44779.42,11.8
+2022-06-14,Leonardo,Aerospace,39682.83,11.2
+2022-07-14,Leonardo,Aerospace,42261.9,11.9
+2022-08-13,Leonardo,Aerospace,27624.22,22.2
+2022-09-12,Leonardo,Aerospace,44483.66,20.5
+2022-10-12,Leonardo,Aerospace,47457.16,21.6
+2022-11-11,Leonardo,Aerospace,48688.08,19.4
+2022-12-11,Leonardo,Aerospace,66626.93,20.2
+2023-01-10,Leonardo,Aerospace,42252.24,18.0
+2023-02-09,Leonardo,Aerospace,47161.97,12.3
+2023-03-11,Leonardo,Aerospace,45675.27,10.7
+2023-04-10,Leonardo,Aerospace,46458.45,18.9
+2023-05-10,Leonardo,Aerospace,51142.58,18.9
+2023-06-09,Leonardo,Aerospace,44597.1,11.6
+2023-07-09,Leonardo,Aerospace,44783.06,21.3
+2023-08-08,Leonardo,Aerospace,27814.41,15.5
+2023-09-07,Leonardo,Aerospace,48855.05,19.7
+2023-10-07,Leonardo,Aerospace,50315.59,24.2
+2023-11-06,Leonardo,Aerospace,47694.01,13.0
+2023-12-06,Leonardo,Aerospace,68716.23,13.6
+2024-01-05,Leonardo,Aerospace,49261.57,20.0
+2024-02-04,Leonardo,Aerospace,50676.3,18.0
+2024-03-05,Leonardo,Aerospace,47480.44,19.6
+2024-04-04,Leonardo,Aerospace,48676.99,10.2
+2024-05-04,Leonardo,Aerospace,47843.87,19.7
+2024-06-03,Leonardo,Aerospace,45758.51,19.0
+2024-07-03,Leonardo,Aerospace,43637.78,11.7
+2024-08-02,Leonardo,Aerospace,31652.26,20.8
+2024-09-01,Leonardo,Aerospace,46878.04,23.9
+2024-10-01,Leonardo,Aerospace,52265.4,10.3
+2024-10-31,Leonardo,Aerospace,48092.41,23.2
+2024-11-30,Leonardo,Aerospace,52493.7,24.9
+2024-12-30,Leonardo,Aerospace,69869.15,19.6
+2025-01-29,Leonardo,Aerospace,46761.0,22.3
+2025-02-28,Leonardo,Aerospace,50433.29,14.1
+2025-03-30,Leonardo,Aerospace,52147.02,12.3
+2025-04-29,Leonardo,Aerospace,50884.67,18.4
+2025-05-29,Leonardo,Aerospace,52196.73,14.8
+2025-06-28,Leonardo,Aerospace,43291.08,21.9
+2025-07-28,Leonardo,Aerospace,47944.81,12.9
+2025-08-27,Leonardo,Aerospace,32309.15,24.0
+2025-09-26,Leonardo,Aerospace,54374.74,11.1
+2025-10-26,Leonardo,Aerospace,49575.6,18.6
+2025-11-25,Leonardo,Aerospace,52854.91,19.8
+2022-01-15,Ferrari,Luxury Auto,71614.09,21.8
+2022-02-14,Ferrari,Luxury Auto,72429.9,17.5
+2022-03-16,Ferrari,Luxury Auto,69141.07,10.2
+2022-04-15,Ferrari,Luxury Auto,74110.72,13.0
+2022-05-15,Ferrari,Luxury Auto,69165.5,13.2
+2022-06-14,Ferrari,Luxury Auto,64324.97,24.4
+2022-07-14,Ferrari,Luxury Auto,64021.12,17.7
+2022-08-13,Ferrari,Luxury Auto,43078.5,19.4
+2022-09-12,Ferrari,Luxury Auto,71981.16,15.0
+2022-10-12,Ferrari,Luxury Auto,71404.53,11.9
+2022-11-11,Ferrari,Luxury Auto,74695.76,19.8
+2022-12-11,Ferrari,Luxury Auto,100072.62,18.9
+2023-01-10,Ferrari,Luxury Auto,69800.18,16.1
+2023-02-09,Ferrari,Luxury Auto,75137.84,18.0
+2023-03-11,Ferrari,Luxury Auto,68256.88,17.0
+2023-04-10,Ferrari,Luxury Auto,74555.36,24.7
+2023-05-10,Ferrari,Luxury Auto,76823.73,14.6
+2023-06-09,Ferrari,Luxury Auto,64657.52,15.4
+2023-07-09,Ferrari,Luxury Auto,64398.21,21.2
+2023-08-08,Ferrari,Luxury Auto,42904.4,20.7
+2023-09-07,Ferrari,Luxury Auto,78395.01,17.5
+2023-10-07,Ferrari,Luxury Auto,71054.19,15.4
+2023-11-06,Ferrari,Luxury Auto,72237.28,10.9
+2023-12-06,Ferrari,Luxury Auto,103427.95,14.0
+2024-01-05,Ferrari,Luxury Auto,71356.81,18.7
+2024-02-04,Ferrari,Luxury Auto,68327.73,21.5
+2024-03-05,Ferrari,Luxury Auto,76992.45,20.4
+2024-04-04,Ferrari,Luxury Auto,78463.1,14.5
+2024-05-04,Ferrari,Luxury Auto,69036.71,12.7
+2024-06-03,Ferrari,Luxury Auto,65073.63,12.7
+2024-07-03,Ferrari,Luxury Auto,68767.36,10.5
+2024-08-02,Ferrari,Luxury Auto,45574.23,16.3
+2024-09-01,Ferrari,Luxury Auto,78738.28,18.7
+2024-10-01,Ferrari,Luxury Auto,73979.64,19.8
+2024-10-31,Ferrari,Luxury Auto,72490.25,10.1
+2024-11-30,Ferrari,Luxury Auto,75182.87,20.1
+2024-12-30,Ferrari,Luxury Auto,103599.31,18.8
+2025-01-29,Ferrari,Luxury Auto,76468.64,15.2
+2025-02-28,Ferrari,Luxury Auto,77418.86,20.7
+2025-03-30,Ferrari,Luxury Auto,79274.1,20.3
+2025-04-29,Ferrari,Luxury Auto,80783.65,19.1
+2025-05-29,Ferrari,Luxury Auto,78879.13,16.0
+2025-06-28,Ferrari,Luxury Auto,67383.54,12.6
+2025-07-28,Ferrari,Luxury Auto,66370.84,23.5
+2025-08-27,Ferrari,Luxury Auto,44913.93,11.2
+2025-09-26,Ferrari,Luxury Auto,72033.04,21.6
+2025-10-26,Ferrari,Luxury Auto,73022.82,12.0
+2025-11-25,Ferrari,Luxury Auto,75752.31,21.3
+2022-01-15,Brunello Cucinelli,Fashion,62540.82,15.1
+2022-02-14,Brunello Cucinelli,Fashion,62287.68,11.7
+2022-03-16,Brunello Cucinelli,Fashion,62108.09,10.4
+2022-04-15,Brunello Cucinelli,Fashion,61974.15,18.1
+2022-05-15,Brunello Cucinelli,Fashion,55424.64,23.3
+2022-06-14,Brunello Cucinelli,Fashion,63881.94,21.4
+2022-07-14,Brunello Cucinelli,Fashion,55217.04,13.2
+2022-08-13,Brunello Cucinelli,Fashion,34290.78,13.5
+2022-09-12,Brunello Cucinelli,Fashion,63991.03,21.7
+2022-10-12,Brunello Cucinelli,Fashion,71087.87,20.3
+2022-11-11,Brunello Cucinelli,Fashion,84452.46,20.4
+2022-12-11,Brunello Cucinelli,Fashion,120615.34,20.4
+2023-01-10,Brunello Cucinelli,Fashion,80437.51,23.8
+2023-02-09,Brunello Cucinelli,Fashion,72213.9,21.0
+2023-03-11,Brunello Cucinelli,Fashion,71479.09,15.0
+2023-04-10,Brunello Cucinelli,Fashion,84861.54,13.8
+2023-05-10,Brunello Cucinelli,Fashion,73452.25,20.9
+2023-06-09,Brunello Cucinelli,Fashion,62094.67,24.1
+2023-07-09,Brunello Cucinelli,Fashion,70771.14,14.8
+2023-08-08,Brunello Cucinelli,Fashion,51889.43,20.4
+2023-09-07,Brunello Cucinelli,Fashion,96324.1,14.4
+2023-10-07,Brunello Cucinelli,Fashion,80967.34,18.2
+2023-11-06,Brunello Cucinelli,Fashion,88441.47,15.4
+2023-12-06,Brunello Cucinelli,Fashion,99619.69,10.3
+2024-01-05,Brunello Cucinelli,Fashion,82605.2,19.8
+2024-02-04,Brunello Cucinelli,Fashion,78087.12,21.9
+2024-03-05,Brunello Cucinelli,Fashion,89504.63,13.8
+2024-04-04,Brunello Cucinelli,Fashion,71967.81,18.3
+2024-05-04,Brunello Cucinelli,Fashion,71766.53,10.1
+2024-06-03,Brunello Cucinelli,Fashion,82634.4,23.2
+2024-07-03,Brunello Cucinelli,Fashion,91494.01,10.4
+2024-08-02,Brunello Cucinelli,Fashion,50182.16,19.3
+2024-09-01,Brunello Cucinelli,Fashion,85016.36,12.6
+2024-10-01,Brunello Cucinelli,Fashion,111123.62,24.4
+2024-10-31,Brunello Cucinelli,Fashion,79236.13,12.8
+2024-11-30,Brunello Cucinelli,Fashion,85021.74,19.3
+2024-12-30,Brunello Cucinelli,Fashion,128611.05,15.8
+2025-01-29,Brunello Cucinelli,Fashion,95204.4,10.2
+2025-02-28,Brunello Cucinelli,Fashion,72636.33,16.4
+2025-03-30,Brunello Cucinelli,Fashion,93195.18,12.4
+2025-04-29,Brunello Cucinelli,Fashion,99875.15,16.7
+2025-05-29,Brunello Cucinelli,Fashion,88651.69,22.0
+2025-06-28,Brunello Cucinelli,Fashion,71047.71,17.4
+2025-07-28,Brunello Cucinelli,Fashion,81455.27,11.3
+2025-08-27,Brunello Cucinelli,Fashion,56259.05,23.9
+2025-09-26,Brunello Cucinelli,Fashion,92088.96,23.1
+2025-10-26,Brunello Cucinelli,Fashion,103374.52,19.8
+2025-11-25,Brunello Cucinelli,Fashion,109144.18,23.1
+2022-01-15,Gucci,Fashion,48570.56,20.0
+2022-02-14,Gucci,Fashion,51636.09,19.9
+2022-03-16,Gucci,Fashion,44649.21,21.4
+2022-04-15,Gucci,Fashion,36109.28,20.7
+2022-05-15,Gucci,Fashion,37934.89,17.7
+2022-06-14,Gucci,Fashion,36513.64,18.1
+2022-07-14,Gucci,Fashion,43882.79,18.4
+2022-08-13,Gucci,Fashion,24096.82,10.1
+2022-09-12,Gucci,Fashion,46587.93,14.8
+2022-10-12,Gucci,Fashion,45081.25,21.0
+2022-11-11,Gucci,Fashion,45610.65,18.2
+2022-12-11,Gucci,Fashion,69229.85,15.0
+2023-01-10,Gucci,Fashion,44385.44,19.0
+2023-02-09,Gucci,Fashion,47267.15,17.5
+2023-03-11,Gucci,Fashion,42303.7,20.8
+2023-04-10,Gucci,Fashion,42590.31,16.2
+2023-05-10,Gucci,Fashion,31298.14,18.1
+2023-06-09,Gucci,Fashion,45530.76,19.1
+2023-07-09,Gucci,Fashion,47579.26,16.4
+2023-08-08,Gucci,Fashion,28488.39,22.7
+2023-09-07,Gucci,Fashion,48406.36,17.0
+2023-10-07,Gucci,Fashion,34607.37,20.9
+2023-11-06,Gucci,Fashion,53740.12,18.1
+2023-12-06,Gucci,Fashion,60072.2,11.7
+2024-01-05,Gucci,Fashion,43964.11,10.7
+2024-02-04,Gucci,Fashion,43899.12,24.2
+2024-03-05,Gucci,Fashion,61570.25,20.9
+2024-04-04,Gucci,Fashion,53123.12,22.2
+2024-05-04,Gucci,Fashion,39617.54,14.3
+2024-06-03,Gucci,Fashion,37961.05,15.1
+2024-07-03,Gucci,Fashion,46388.17,20.7
+2024-08-02,Gucci,Fashion,34700.28,12.9
+2024-09-01,Gucci,Fashion,44054.07,20.6
+2024-10-01,Gucci,Fashion,36346.33,17.1
+2024-10-31,Gucci,Fashion,52736.43,17.0
+2024-11-30,Gucci,Fashion,41624.35,10.2
+2024-12-30,Gucci,Fashion,54851.36,13.7
+2025-01-29,Gucci,Fashion,40887.67,19.3
+2025-02-28,Gucci,Fashion,40987.85,19.2
+2025-03-30,Gucci,Fashion,50390.18,17.0
+2025-04-29,Gucci,Fashion,30242.55,12.8
+2025-05-29,Gucci,Fashion,37397.64,17.1
+2025-06-28,Gucci,Fashion,33044.48,17.4
+2025-07-28,Gucci,Fashion,39696.08,15.6
+2025-08-27,Gucci,Fashion,19505.63,12.7
+2025-09-26,Gucci,Fashion,38504.03,14.7
+2025-10-26,Gucci,Fashion,47510.63,12.2
+2025-11-25,Gucci,Fashion,50364.81,15.3
