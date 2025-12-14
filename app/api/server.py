@@ -7,6 +7,8 @@ import sys
 import os
 from fastapi.responses import Response
 from app.services.pdf_generator import PDFReportGenerator
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # Aggiungiamo la root al path per sicurezza
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -19,6 +21,23 @@ app = FastAPI(
     description="Backend Enterprise per Forecasting Strategico Multi-Agente",
     version="1.0.0"
 )
+# 1. ABILITA CORS (Fondamentale per il frontend)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In produzione si mette il dominio specifico, qui va bene *
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 2. SERVI IL FRONTEND STATICO
+# Montiamo la cartella 'app/ui/static' sulla rotta base
+import os
+static_path = os.path.join(os.path.dirname(__file__), '../ui/static')
+if not os.path.exists(static_path):
+    os.makedirs(static_path)
+
+app.mount("/dashboard", StaticFiles(directory=static_path, html=True), name="static")
 
 # --- DTOs (Data Transfer Objects) ---
 class ForecastRequest(BaseModel):
