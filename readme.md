@@ -1,4 +1,3 @@
-@'
 # ☢️ Progetto Manhattan
 
 > **Advanced Multi-Agent System for Strategic Forecasting.**
