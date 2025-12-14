@@ -1,55 +1,86 @@
+@'
 # ☢️ Progetto Manhattan
 
-> **Advanced Multi-Agent System for Strategic Forecasting.**
-> *Proof of Concept (POC) - Internal Contest 2025*
+> **Next-Gen Strategic Forecasting System.**
+> *Hybrid AI Architecture: Deterministic Forecasting + Cognitive Reasoning.*
 
-## 📋 Mission
-**Progetto Manhattan** è un'architettura software sperimentale progettata per rivoluzionare il processo decisionale negli account strategici.
-Il sistema supera i limiti della Business Intelligence tradizionale fondendo **Analisi Predittiva (Hard AI)** e **Ragionamento Cognitivo (Soft AI)** in un'unica pipeline autonoma.
+![Status](https://img.shields.io/badge/Status-POC_Complete-success)
+![Stack](https://img.shields.io/badge/Architecture-API_First-blue)
+![AI](https://img.shields.io/badge/AI_Model-GPT--4o-green)
 
-## 🏗️ Architettura "Hybrid Engine"
-Il core del sistema si basa su una separazione netta delle responsabilità:
+## 📋 Executive Summary
+**Progetto Manhattan** non è una semplice dashboard, ma un ecosistema software progettato per potenziare le decisioni degli Account Manager.
+Il sistema supera i limiti della BI tradizionale integrando due motori distinti:
+1.  **Hard AI (Facebook Prophet):** Analisi matematica delle serie storiche, stagionalità e calcolo del rischio (Intervalli di Confidenza).
+2.  **Soft AI (LangGraph + GPT-4o):** Un "consiglio di amministrazione" virtuale che analizza il web in tempo reale e incrocia i dati finanziari con le news di mercato.
 
-1.  **The Quantitative Core (Prophet):**
-    *   Analisi deterministica delle serie storiche.
-    *   Rilevamento stagionalità e trend matematici puri.
-    *   Calcolo degli intervalli di confidenza (Risk Assessment).
+---
 
-2.  **The Cognitive Cortex (LangGraph):**
-    *   Un grafo di agenti AI autonomi che "leggono" il mondo reale.
-    *   **Analyst Agent:** Traduce i numeri in insight di business.
-    *   **Researcher Agent:** Esegue scraping etico del web (Tavily) per news in tempo reale.
-    *   **Director Agent:** Sintetizza strategie complesse (Upselling, Churn Prevention).
+## 🏗️ Architettura Tecnica (Enterprise Grade)
 
-## 🚀 Quick Start
+Il sistema è stato rifattorizzato seguendo il pattern **Decoupled Architecture**:
 
-### Requisiti
-*   Python 3.10+
-*   Accesso API: OpenAI, Tavily
-
-### Installazione
-```bash
-# 1. Clona il repository
-git clone https://github.com/TUO_USERNAME/progetto-manhattan.git
-cd progetto-manhattan
-
-# 2. Installa le dipendenze
-pip install -r requirements.txt
-
-# 3. Configura le chiavi segrete
-# Crea un file .env (non incluso nella repo) con:
-# OPENAI_API_KEY=sk-...
-# TAVILY_API_KEY=tvly-...
+```mermaid
+graph TD
+    A[Frontend: Tailwind/AlpineJS] <-->|REST API| B(Backend: FastAPI)
+    B <--> C{Orchestrator: LangGraph}
+    C <--> D[Agent: Analyst]
+    C <--> E[Agent: Researcher]
+    C <--> F[Agent: Director]
+    B <--> G[Engine: Prophet Forecasting]
+    G <--> H[(Data Layer)]
+🔹 Backend (Core)
+Framework: FastAPI (Python 3.10).
+Performance: Asynchronous request handling con Uvicorn.
+Documentation: Swagger UI nativa per l'integrazione con sistemi terzi (SAP, Salesforce).
+Features:
+Endpoint /forecast per calcolo serie temporali.
+Endpoint /agent/analyze per la pipeline cognitiva.
+Endpoint /agent/chat per sessioni Q&A contestuali.
+Generatore PDF server-side con sanificazione input.
+🔹 Frontend (UI)
+Tech: HTML5, Tailwind CSS, Alpine.js, Chart.js.
+Design: Glassmorphism UI (Dark Mode).
+UX: Single Page Application (SPA) reattiva, senza ricaricamenti di pagina.
+🤖 Il "Cervello" Multi-Agente
+Il sistema impiega uno swarm di agenti specializzati orchestrati da LangGraph:
+📉 The Quant Analyst:
+Analizza i dati grezzi di Prophet.
+Identifica trend di crescita (CAGR) e anomalie statistiche.
+🌍 The Market Researcher:
+Utilizza Tavily AI per scansionare il web in tempo reale.
+Filtra fake news e cerca segnali deboli (M&A, cambi management, crisi di settore).
+👔 The Strategic Director (GPT-4o):
+Sintetizza i dati quantitativi e qualitativi.
+Genera azioni commerciali concrete (Upselling, Retention, Crisis Management).
+Risponde alle domande dell'utente in chat mantenendo il contesto.
+🚀 Quick Start
+1. Prerequisiti
+Python 3.10+
+Chiavi API (OpenAI & Tavily) configurate nel file .env.
+2. Installazione
 code
 Bash
-# Lancia la dashboard
-streamlit run app/main.py
-🛠️ Stack Tecnologico
-Orchestrator: LangGraph
-LLM: GPT-4o / GPT-3.5 Turbo
-Forecasting: Facebook Prophet
-Frontend: Streamlit Enterprise UI
-Search: Tavily AI Search
-
-Developed by ["TeoFil795", "PaoloPro"]
+git clone https://github.com/TUO_USERNAME/progetto_manhattan.git
+cd progetto_manhattan
+pip install -r requirements.txt
+3. Avvio del Sistema
+Poiché l'architettura è client-server, basta avviare il backend. Il frontend è servito staticamente.
+code
+Bash
+# Avvia il server API
+uvicorn app.api.server:app --reload
+4. Accesso
+Dashboard Strategica: Apri il browser su http://127.0.0.1:8000/dashboard/index.html
+Documentazione API (Swagger): http://127.0.0.1:8000/docs
+📂 Struttura del Progetto
+code
+Text
+/app
+├── /api           # FastAPI Endpoints (REST Interface)
+├── /core          # Configurazioni e Prompts di Sistema
+├── /data          # Data Layer & Seeder sintetico
+├── /services      # Business Logic (Prophet, LangGraph Agent, PDF Engine)
+└── /ui            # Frontend Statico (HTML/JS/CSS)
+Developed for Akkodis Internal Contest 2025
 '@ | Out-File -Encoding utf8 README.md
