@@ -6,7 +6,7 @@
 
 ![Status](https://img.shields.io/badge/Status-POC_Complete-success)
 ![Stack](https://img.shields.io/badge/Architecture-API_First-blue)
-![AI](https://img.shields.io/badge/AI_Model-GPT--4o-green)
+![AI](https://img.shields.io/badge/AI_Model-GPT--5mini-green)
 
 ## 📋 Executive Summary
 **Progetto Manhattan** non è una semplice dashboard, ma un ecosistema software progettato per potenziare le decisioni degli Account Manager.
