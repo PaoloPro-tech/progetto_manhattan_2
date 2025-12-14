@@ -29,7 +29,21 @@ class AnalysisRequest(BaseModel):
     # Le metriche sono opzionali, se non ci sono le ricalcoliamo
     metrics: dict = None 
 
+class ChatRequest(BaseModel):
+    question: str
+    context_report: str  # Il testo del report su cui basare la risposta
+
 # --- Endpoints ---
+
+@app.post("/agent/chat")
+def chat_agent(req: ChatRequest):
+    try:
+        engine = AgentEngine()
+        # Qui il Server CHIAMA il Cervello
+        answer = engine.chat_with_director(req.question, req.context_report)
+        return {"answer": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/")
 def health_check():

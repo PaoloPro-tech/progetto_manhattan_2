@@ -31,7 +31,7 @@ class AgentEngine:
         # Inizializziamo il modello LLM
         self.llm = ChatOpenAI(
             api_key=settings.OPENAI_API_KEY, 
-            model="gpt-3.5-turbo", 
+            model="gpt-5-mini-2025-08-07", 
             temperature=0
         )
         
@@ -136,6 +136,34 @@ class AgentEngine:
         }
         
         return app.invoke(inputs)
+
+
+    def chat_with_director(self, user_question: str, context_report: str):
+        """
+        Permette di fare Q&A sul report generato.
+        Usa il report finale come contesto per rispondere.
+        """
+        print(f"   ... 💬 Chat in corso: {user_question} ...")
+        
+        system_prompt = """
+        Sei il Direttore Strategico di Akkodis. 
+        Hai appena redatto un report strategico per un cliente (che ti fornisco come contesto).
+        
+        L'Account Manager ti sta facendo domande di approfondimento.
+        Rispondi in modo professionale, sintetico e basandoti ESCLUSIVAMENTE sui dati del report.
+        Se la domanda è fuori contesto, rispondi che non hai dati a riguardo.
+        """
+        
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", system_prompt),
+            ("user", f"CONTESTO REPORT:\n{context_report}\n\nDOMANDA ACCOUNT MANAGER:\n{user_question}")
+        ])
+        
+        chain = prompt | self.llm | StrOutputParser()
+        response = chain.invoke({})
+        
+        return response
+    
 
 # Test locale
 if __name__ == "__main__":

@@ -3,10 +3,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import requests
 import time
-import json
 
 # CONFIGURAZIONE API
-# Se un domani metti il backend su Azure, cambi solo questa stringa!
 API_URL = "http://127.0.0.1:8000"
 
 st.set_page_config(page_title="Progetto Manhattan", page_icon="☢️", layout="wide")
@@ -16,50 +14,39 @@ st.markdown("""
 <style>
     .stButton>button { width: 100%; border-radius: 5px; }
     .report-box { background-color: #f0f2f6; color: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #d1d5db; }
+    /* Chat bubbles */
+    .chat-user { background-color: #e3f2fd; padding: 10px; border-radius: 10px; margin-bottom: 5px; text-align: right; color: #0d47a1; }
+    .chat-bot { background-color: #f1f8e9; padding: 10px; border-radius: 10px; margin-bottom: 5px; color: #1b5e20; }
 </style>
 """, unsafe_allow_html=True)
 
+# --- Inizializzazione Session State ---
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+if "final_report_context" not in st.session_state:
+    st.session_state.final_report_context = ""
+if "analysis_done" not in st.session_state:
+    st.session_state.analysis_done = False
+
 def fetch_clients():
-    """Chiede all'API la lista dei clienti"""
     try:
         resp = requests.get(f"{API_URL}/clients")
         if resp.status_code == 200:
             return resp.json()["clients"]
         return []
     except:
-        st.error("⚠️ Impossibile connettersi al Backend API. Assicurati che uvicorn sia attivo!")
         return []
 
 def plot_forecast_from_json(forecast_data, client_name):
-    """Ricostruisce il grafico Plotly dai dati JSON ricevuti dall'API"""
     df = pd.DataFrame(forecast_data)
-    
     fig = go.Figure()
-    
-    # 1. Linea principale (Predizione)
-    fig.add_trace(go.Scatter(
-        x=df['ds'], y=df['yhat'],
-        mode='lines', name='Previsione',
-        line=dict(color='#007bff', width=3)
-    ))
-    
-    # 2. Intervallo di confidenza (Area ombreggiata)
+    fig.add_trace(go.Scatter(x=df['ds'], y=df['yhat'], mode='lines', name='Previsione', line=dict(color='#007bff', width=3)))
     fig.add_trace(go.Scatter(
         x=pd.concat([df['ds'], df['ds'][::-1]]),
         y=pd.concat([df['yhat_upper'], df['yhat_lower'][::-1]]),
-        fill='toself',
-        fillcolor='rgba(0,123,255,0.2)',
-        line=dict(color='rgba(255,255,255,0)'),
-        name='Confidenza'
+        fill='toself', fillcolor='rgba(0,123,255,0.2)', line=dict(color='rgba(255,255,255,0)'), name='Confidenza'
     ))
-    
-    fig.update_layout(
-        title=f"Forecast Strategico: {client_name}",
-        xaxis_title="Timeline",
-        yaxis_title="Fatturato Previsto (€)",
-        template="plotly_white",
-        height=400
-    )
+    fig.update_layout(title=f"Forecast Strategico: {client_name}", xaxis_title="Timeline", yaxis_title="Fatturato (€)", template="plotly_white", height=400)
     return fig
 
 def main():
@@ -67,122 +54,137 @@ def main():
     st.sidebar.title("☢️ Manhattan")
     st.sidebar.caption("API-First Architecture")
     
-    # 1. Sezione Upload (SCALABILITÀ)
     st.sidebar.subheader("📂 Dati Sorgente")
     uploaded_file = st.sidebar.file_uploader("Carica CSV Aziendale", type="csv")
-    
     if uploaded_file:
-        with st.spinner("Caricamento dati al Backend..."):
+        with st.spinner("Upload..."):
             files = {"file": (uploaded_file.name, uploaded_file, "text/csv")}
             try:
-                resp = requests.post(f"{API_URL}/upload-data", files=files)
-                if resp.status_code == 200:
-                    st.sidebar.success(f"✅ Upload OK! ({resp.json()['rows']} righe)")
-                else:
-                    st.sidebar.error("Errore Upload")
-            except Exception as e:
-                st.sidebar.error(f"Backend offline: {e}")
+                requests.post(f"{API_URL}/upload-data", files=files)
+                st.sidebar.success("✅ Upload OK")
+            except:
+                st.sidebar.error("Backend Offline")
 
     st.sidebar.markdown("---")
-    
-    # 2. Selezione Cliente
     clienti = fetch_clients()
     if not clienti:
-        st.warning("Backend non raggiungibile.")
+        st.error("Backend Offline. Avvia uvicorn!")
         st.stop()
         
     selected_client = st.sidebar.selectbox("Seleziona Cliente", clienti)
-    
-    # Settore (Hardcoded per semplicità nella UI, o potremmo chiederlo all'API)
-    # Per la demo va bene così o si può migliorare l'endpoint /clients per restituire anche il settore
     sector_map = {"Leonardo": "Aerospace", "Stellantis": "Automotive", "Ferrari": "Luxury", "Gucci": "Fashion"}
     sector = sector_map.get(selected_client, "General Industry")
     
     if st.sidebar.button("🚀 Lancia Analisi Completa", type="primary"):
+        # Reset stato quando si lancia una nuova analisi
+        st.session_state.chat_history = []
+        st.session_state.final_report_context = ""
+        st.session_state.analysis_done = False
         run_dashboard(selected_client, sector)
 
+    # Se l'analisi è stata fatta, mostriamo la UI persistente (così la chat non sparisce)
+    if st.session_state.analysis_done:
+        render_persistent_ui(selected_client)
+
 def run_dashboard(client, sector):
+    # Logica di calcolo (eseguita una volta sola al click)
+    metrics = None
+    
+    with st.spinner("⏳ Elaborazione Prophet & Agenti..."):
+        try:
+            # 1. Forecast
+            payload = {"client_name": client, "months": 12}
+            resp = requests.post(f"{API_URL}/forecast", json=payload)
+            if resp.status_code != 200:
+                st.error("Errore Forecast")
+                return
+            data = resp.json()
+            metrics = data["metrics"]
+            st.session_state.forecast_data = data["forecast_data"]
+            st.session_state.metrics = metrics
+
+            # 2. Agenti
+            agent_payload = {"client_name": client, "sector": sector, "metrics": metrics}
+            agent_resp = requests.post(f"{API_URL}/agent/analyze", json=agent_payload)
+            if agent_resp.status_code != 200:
+                st.error("Errore Agenti")
+                return
+            
+            agent_data = agent_resp.json()
+            st.session_state.agent_data = agent_data
+            # Salviamo il report per il contesto della chat
+            st.session_state.final_report_context = agent_data["final_report"]
+            st.session_state.analysis_done = True
+            
+        except Exception as e:
+            st.error(f"Errore Critico: {e}")
+
+def render_persistent_ui(client):
+    """Renderizza la dashboard usando i dati salvati in Session State"""
     st.title(f"Dashboard Strategica: {client}")
-    st.markdown(f"**Target Sector:** {sector} | **Engine:** Prophet + GPT-4o")
     
     col1, col2 = st.columns([6, 4])
     
-    # Variabili per conservare i dati tra le colonne
-    metrics = None
-    
-    # --- COLONNA 1: DATI QUANTITATIVI (API /forecast) ---
+    # --- COLONNA 1: DATI ---
     with col1:
         st.subheader("📉 Proiezione Finanziaria")
-        with st.spinner("Richiesta al Neural Engine (Prophet)..."):
-            try:
-                payload = {"client_name": client, "months": 12}
-                resp = requests.post(f"{API_URL}/forecast", json=payload)
-                
-                if resp.status_code == 200:
-                    data = resp.json()
-                    metrics = data["metrics"]
-                    forecast_raw = data["forecast_data"]
-                    
-                    # Visualizza Metriche
-                    c1, c2, c3 = st.columns(3)
-                    c1.metric("Previsione FY2026", f"€ {metrics['previsione_prossimo_anno']:,.0f}")
-                    c2.metric("Growth Rate", f"{metrics['crescita_percentuale']}%", delta=metrics['trend_di_fondo'])
-                    c3.metric("Confidence", "High" if metrics['confidenza_min'] > 0 else "Low")
-                    
-                    # Disegna Grafico
-                    fig = plot_forecast_from_json(forecast_raw, client)
-                    st.plotly_chart(fig, use_container_width=True)
-                else:
-                    st.error(f"Errore API Forecast: {resp.text}")
-                    st.stop()
-            except Exception as e:
-                st.error(f"Connection Error: {e}")
-                st.stop()
+        metrics = st.session_state.metrics
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Previsione FY2026", f"€ {metrics['previsione_prossimo_anno']:,.0f}")
+        c2.metric("Growth Rate", f"{metrics['crescita_percentuale']}%", delta=metrics['trend_di_fondo'])
+        c3.metric("Confidence", "High" if metrics['confidenza_min'] > 0 else "Low")
+        
+        fig = plot_forecast_from_json(st.session_state.forecast_data, client)
+        st.plotly_chart(fig, use_container_width=True)
 
-    # --- COLONNA 2: AGENTI COGNITIVI (API /agent/analyze) ---
+    # --- COLONNA 2: AGENTI ---
     with col2:
-        st.subheader("🧠 Analisi Agenti Autonomi")
+        st.subheader("🧠 Report Agenti")
+        agent_data = st.session_state.agent_data
         
-        status_box = st.status("Inizializzazione swarm di agenti...", expanded=True)
+        with st.expander("📝 Insight Interni & Esterne"):
+            st.info(agent_data["analyst_output"])
+            st.success(agent_data["researcher_output"])
+            
+        st.markdown(f"""
+        <div class="report-box">
+            <h4>👔 Direttore Strategico</h4>
+            {agent_data['final_report']}
+        </div>
+        """, unsafe_allow_html=True)
+
+    # --- SEZIONE CHAT (NUOVA!) ---
+    st.markdown("---")
+    st.subheader("💬 Parla con il Direttore Strategico")
+    
+    # Mostra cronologia
+    for msg in st.session_state.chat_history:
+        if msg["role"] == "user":
+            st.markdown(f'<div class="chat-user">👤 <b>Tu:</b> {msg["content"]}</div>', unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div class="chat-bot">👔 <b>Direttore:</b> {msg["content"]}</div>', unsafe_allow_html=True)
+
+    # Input Chat
+    if prompt := st.chat_input("Chiedi dettagli sulla strategia... (es: 'Perché suggerisci upselling?')"):
+        # 1. Aggiungi messaggio utente
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
         
-        try:
-            status_box.write("📡 Handshake con API Backend...")
-            
-            # Chiamata API Agenti
-            agent_payload = {
-                "client_name": client, 
-                "sector": sector,
-                "metrics": metrics # Passiamo le metriche calcolate prima
-            }
-            
-            status_box.write("🕵️ Analista & Ricercatore al lavoro...")
-            agent_resp = requests.post(f"{API_URL}/agent/analyze", json=agent_payload)
-            
-            if agent_resp.status_code == 200:
-                agent_data = agent_resp.json()
-                status_box.update(label="Analisi Completata", state="complete", expanded=False)
-                
-                # Tab per vedere i dettagli
-                tab1, tab2 = st.tabs(["📝 Insight Interni", "🌍 News Esterne"])
-                with tab1:
-                    st.info(agent_data["analyst_output"])
-                with tab2:
-                    st.success(agent_data["researcher_output"])
-                
-                # Report Finale
-                st.markdown("### 👔 Direttore Strategico")
-                st.markdown(f"""
-                <div class="report-box">
-                    {agent_data['final_report']}
-                </div>
-                """, unsafe_allow_html=True)
-                
-            else:
-                status_box.update(label="Errore Agenti", state="error")
-                st.error(agent_resp.text)
-                
-        except Exception as e:
-            st.error(f"Errore critico: {e}")
+        # 2. Chiama API Backend
+        with st.spinner("Il Direttore sta riflettendo..."):
+            try:
+                chat_payload = {
+                    "question": prompt,
+                    "context_report": st.session_state.final_report_context
+                }
+                resp = requests.post(f"{API_URL}/agent/chat", json=chat_payload)
+                if resp.status_code == 200:
+                    answer = resp.json()["answer"]
+                    st.session_state.chat_history.append({"role": "assistant", "content": answer})
+                    st.rerun() # Ricarica per mostrare il nuovo messaggio
+                else:
+                    st.error("Errore API Chat")
+            except Exception as e:
+                st.error(f"Errore connessione: {e}")
 
 if __name__ == "__main__":
     main()
