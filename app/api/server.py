@@ -5,6 +5,8 @@ import pandas as pd
 import io
 import sys
 import os
+from fastapi.responses import Response
+from app.services.pdf_generator import PDFReportGenerator
 
 # Aggiungiamo la root al path per sicurezza
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -32,6 +34,11 @@ class AnalysisRequest(BaseModel):
 class ChatRequest(BaseModel):
     question: str
     context_report: str  # Il testo del report su cui basare la risposta
+
+class ReportRequest(BaseModel):
+    client_name: str
+    sector: str
+    report_text: str
 
 # --- Endpoints ---
 
@@ -116,5 +123,24 @@ async def upload_csv(file: UploadFile = File(...)):
         # Salviamo come file custom
         df.to_csv("app/data/custom_upload.csv", index=False)
         return {"message": "Upload completato", "rows": len(df)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/report/pdf")
+def generate_pdf(req: ReportRequest):
+    """Genera il PDF al volo e lo restituisce come file binario"""
+    try:
+        pdf_gen = PDFReportGenerator(req.client_name, req.sector)
+        pdf_gen.add_content(req.report_text)
+        
+        # Ottiene i byte del PDF
+        # Converte il bytearray in bytes immutabili
+        pdf_bytes = bytes(pdf_gen.output(dest='S'))
+        
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=Report_{req.client_name}.pdf"}
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

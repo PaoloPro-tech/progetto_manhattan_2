@@ -152,8 +152,32 @@ def render_persistent_ui(client):
             {agent_data['final_report']}
         </div>
         """, unsafe_allow_html=True)
+    
+        # --- BOTTONE DOWNLOAD PDF ---
+        st.markdown("###") # Spaziatura
+        if st.button("📥 Genera PDF Ufficiale"):
+            with st.spinner("Impaginazione PDF in corso..."):
+                try:
+                    pdf_payload = {
+                        "client_name": client,
+                        "sector": "Strategy", # O recuperalo dallo stato se vuoi
+                        "report_text": agent_data['final_report']
+                    }
+                    resp = requests.post(f"{API_URL}/report/pdf", json=pdf_payload)
+                    
+                    if resp.status_code == 200:
+                        st.download_button(
+                            label="📄 Clicca qui per scaricare il PDF",
+                            data=resp.content,
+                            file_name=f"Report_Strategico_{client}.pdf",
+                            mime="application/pdf"
+                        )
+                    else:
+                        st.error(f"Errore Backend: {resp.text}")
+                except Exception as e:
+                    st.error(f"Errore: {e}")
 
-    # --- SEZIONE CHAT (NUOVA!) ---
+    # --- SEZIONE CHAT ---
     st.markdown("---")
     st.subheader("💬 Parla con il Direttore Strategico")
     

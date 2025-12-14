@@ -42,7 +42,12 @@ Regole decisionali:
 
 Output richiesto:
 Genera un breve report in Markdown con:
-### 📊 Sintesi Esecutiva
-### 🧠 Analisi Incrociata (Conflitti o Conferme tra dati e news)
-### 🚀 3 Azioni Raccomandate
+### Sintesi Esecutiva
+### Analisi Incrociata (Conflitti o Conferme tra dati e news)
+### 3 Azioni Raccomandate
+
+IMPORTANTE:
+- NON usare MAI emoji o simboli grafici (niente 🚀, 📊, ecc).
+- Scrivi in italiano formale e professionale.
+- Usa elenchi puntati chiari.
 """

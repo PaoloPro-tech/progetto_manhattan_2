@@ -23,3 +23,6 @@ langchain-tavily>=0.0.2
 # --- Forecasting ---
 prophet
 plotly
+
+# --- Donwload PDF
+fpdf2
