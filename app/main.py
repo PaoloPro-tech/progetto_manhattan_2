@@ -1,144 +1,188 @@
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
+import requests
 import time
-import sys
-import os
+import json
 
-# Hack per i percorsi (così non devi settare PYTHONPATH ogni volta)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# CONFIGURAZIONE API
+# Se un domani metti il backend su Azure, cambi solo questa stringa!
+API_URL = "http://127.0.0.1:8000"
 
-from app.services.forecasting import ForecastingService
-from app.services.agent_engine import AgentEngine
+st.set_page_config(page_title="Progetto Manhattan", page_icon="☢️", layout="wide")
 
-# Configurazione Pagina
-st.set_page_config(
-    page_title="Akkodis Account Intelligence",
-    page_icon="🔮",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# CSS Custom per dare un look "Enterprise"
+# CSS Custom
 st.markdown("""
 <style>
-    .metric-card {
-        background-color: #f0f2f6;
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 5px solid #ff4b4b;
-    }
-    .stAlert {
-        border-radius: 10px;
-    }
+    .stButton>button { width: 100%; border-radius: 5px; }
+    .report-box { background-color: #f0f2f6; color: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #d1d5db; }
 </style>
 """, unsafe_allow_html=True)
 
-def main():
-    # --- Sidebar: Controlli ---
-    st.sidebar.title("🔮 Manhattan Project")
-    st.sidebar.caption("Akkodis Account Intelligence")
-    st.sidebar.markdown("---")
-    
-    # Carichiamo la lista clienti dal CSV (usando il servizio forecasting per comodità)
+def fetch_clients():
+    """Chiede all'API la lista dei clienti"""
     try:
-        fs = ForecastingService()
-        clienti_disponibili = fs.raw_df["cliente"].unique().tolist()
-    except Exception as e:
-        st.error(f"Errore caricamento dati: {e}")
-        return
+        resp = requests.get(f"{API_URL}/clients")
+        if resp.status_code == 200:
+            return resp.json()["clients"]
+        return []
+    except:
+        st.error("⚠️ Impossibile connettersi al Backend API. Assicurati che uvicorn sia attivo!")
+        return []
 
-    selected_client = st.sidebar.selectbox("Seleziona Cliente", clienti_disponibili)
+def plot_forecast_from_json(forecast_data, client_name):
+    """Ricostruisce il grafico Plotly dai dati JSON ricevuti dall'API"""
+    df = pd.DataFrame(forecast_data)
     
-    # Recuperiamo il settore (hack veloce dal dataframe)
-    sector = fs.raw_df[fs.raw_df["cliente"] == selected_client]["settore"].iloc[0]
-    st.sidebar.info(f"📂 Settore: **{sector}**")
+    fig = go.Figure()
     
-    st.sidebar.markdown("---")
-    if st.sidebar.button("🚀 Avvia Analisi Strategica", type="primary"):
-        run_analysis_pipeline(selected_client, sector, fs)
+    # 1. Linea principale (Predizione)
+    fig.add_trace(go.Scatter(
+        x=df['ds'], y=df['yhat'],
+        mode='lines', name='Previsione',
+        line=dict(color='#007bff', width=3)
+    ))
+    
+    # 2. Intervallo di confidenza (Area ombreggiata)
+    fig.add_trace(go.Scatter(
+        x=pd.concat([df['ds'], df['ds'][::-1]]),
+        y=pd.concat([df['yhat_upper'], df['yhat_lower'][::-1]]),
+        fill='toself',
+        fillcolor='rgba(0,123,255,0.2)',
+        line=dict(color='rgba(255,255,255,0)'),
+        name='Confidenza'
+    ))
+    
+    fig.update_layout(
+        title=f"Forecast Strategico: {client_name}",
+        xaxis_title="Timeline",
+        yaxis_title="Fatturato Previsto (€)",
+        template="plotly_white",
+        height=400
+    )
+    return fig
 
-def run_analysis_pipeline(client, sector, fs_service):
-    """Esegue tutto il flusso: Prophet -> Agenti -> UI"""
+def main():
+    # --- SIDEBAR ---
+    st.sidebar.title("☢️ Manhattan")
+    st.sidebar.caption("API-First Architecture")
     
-    # 1. Header
-    st.title(f"Analisi Strategica: {client}")
-    st.markdown(f"**Data:** {pd.Timestamp.now().strftime('%d/%m/%Y')} | **Status:** Generazione in corso...")
+    # 1. Sezione Upload (SCALABILITÀ)
+    st.sidebar.subheader("📂 Dati Sorgente")
+    uploaded_file = st.sidebar.file_uploader("Carica CSV Aziendale", type="csv")
     
-    col1, col2 = st.columns([2, 1])
-    
-    # --- STEP 1: FORECAST QUANTITATIVO ---
-    with col1:
-        st.subheader("📉 Analisi Serie Storiche (Prophet)")
-        with st.spinner("Calcolo proiezioni finanziarie..."):
+    if uploaded_file:
+        with st.spinner("Caricamento dati al Backend..."):
+            files = {"file": (uploaded_file.name, uploaded_file, "text/csv")}
             try:
-                forecast_result = fs_service.generate_forecast(client)
-                
-                # Mostriamo le metriche in alto
-                metrics = forecast_result["metrics"]
-                m1, m2, m3 = st.columns(3)
-                m1.metric("Previsione Fatturato", f"€ {metrics['previsione_prossimo_anno']:,.0f}")
-                m2.metric("Trend", metrics['trend_di_fondo'], delta=f"{metrics['crescita_percentuale']}%")
-                m3.metric("Affidabilità", "Alta" if metrics['confidenza_min'] > 0 else "Media")
-                
-                # Mostriamo il grafico
-                st.plotly_chart(forecast_result["plot"], use_container_width=True)
-                
+                resp = requests.post(f"{API_URL}/upload-data", files=files)
+                if resp.status_code == 200:
+                    st.sidebar.success(f"✅ Upload OK! ({resp.json()['rows']} righe)")
+                else:
+                    st.sidebar.error("Errore Upload")
             except Exception as e:
-                st.error(f"Errore nel forecasting: {e}")
+                st.sidebar.error(f"Backend offline: {e}")
+
+    st.sidebar.markdown("---")
+    
+    # 2. Selezione Cliente
+    clienti = fetch_clients()
+    if not clienti:
+        st.warning("Backend non raggiungibile.")
+        st.stop()
+        
+    selected_client = st.sidebar.selectbox("Seleziona Cliente", clienti)
+    
+    # Settore (Hardcoded per semplicità nella UI, o potremmo chiederlo all'API)
+    # Per la demo va bene così o si può migliorare l'endpoint /clients per restituire anche il settore
+    sector_map = {"Leonardo": "Aerospace", "Stellantis": "Automotive", "Ferrari": "Luxury", "Gucci": "Fashion"}
+    sector = sector_map.get(selected_client, "General Industry")
+    
+    if st.sidebar.button("🚀 Lancia Analisi Completa", type="primary"):
+        run_dashboard(selected_client, sector)
+
+def run_dashboard(client, sector):
+    st.title(f"Dashboard Strategica: {client}")
+    st.markdown(f"**Target Sector:** {sector} | **Engine:** Prophet + GPT-4o")
+    
+    col1, col2 = st.columns([6, 4])
+    
+    # Variabili per conservare i dati tra le colonne
+    metrics = None
+    
+    # --- COLONNA 1: DATI QUANTITATIVI (API /forecast) ---
+    with col1:
+        st.subheader("📉 Proiezione Finanziaria")
+        with st.spinner("Richiesta al Neural Engine (Prophet)..."):
+            try:
+                payload = {"client_name": client, "months": 12}
+                resp = requests.post(f"{API_URL}/forecast", json=payload)
+                
+                if resp.status_code == 200:
+                    data = resp.json()
+                    metrics = data["metrics"]
+                    forecast_raw = data["forecast_data"]
+                    
+                    # Visualizza Metriche
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Previsione FY2026", f"€ {metrics['previsione_prossimo_anno']:,.0f}")
+                    c2.metric("Growth Rate", f"{metrics['crescita_percentuale']}%", delta=metrics['trend_di_fondo'])
+                    c3.metric("Confidence", "High" if metrics['confidenza_min'] > 0 else "Low")
+                    
+                    # Disegna Grafico
+                    fig = plot_forecast_from_json(forecast_raw, client)
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.error(f"Errore API Forecast: {resp.text}")
+                    st.stop()
+            except Exception as e:
+                st.error(f"Connection Error: {e}")
                 st.stop()
 
-    # --- STEP 2: AGENTI COGNITIVI ---
+    # --- COLONNA 2: AGENTI COGNITIVI (API /agent/analyze) ---
     with col2:
-        st.subheader("🧠 Elaborazione Cognitiva")
-        engine = AgentEngine()
+        st.subheader("🧠 Analisi Agenti Autonomi")
         
-        # Container per i log in tempo reale
-        status_container = st.status("Attivazione Agenti AI...", expanded=True)
+        status_box = st.status("Inizializzazione swarm di agenti...", expanded=True)
         
         try:
-            # 1. Analista
-            status_container.write("🤖 **Analista:** Interpretazione dati matematici...")
-            # Simuliamo un piccolo delay per effetto scenico (rimuovibile)
-            time.sleep(1) 
+            status_box.write("📡 Handshake con API Backend...")
             
-            # Lanciamo il grafo
-            result = engine.run_analysis(client, sector, metrics)
+            # Chiamata API Agenti
+            agent_payload = {
+                "client_name": client, 
+                "sector": sector,
+                "metrics": metrics # Passiamo le metriche calcolate prima
+            }
             
-            status_container.write("🌍 **Ricercatore:** Scansione news globali (Tavily)...")
-            status_container.write("👔 **Direttore:** Sintesi strategia finale...")
+            status_box.write("🕵️ Analista & Ricercatore al lavoro...")
+            agent_resp = requests.post(f"{API_URL}/agent/analyze", json=agent_payload)
             
-            status_container.update(label="Analisi Completata!", state="complete", expanded=False)
-            
-            # Mostriamo i dettagli intermedi (Espandibili)
-            with st.expander("Dettaglio Analisi Dati (Internal)"):
-                st.markdown(result["analyst_output"])
+            if agent_resp.status_code == 200:
+                agent_data = agent_resp.json()
+                status_box.update(label="Analisi Completata", state="complete", expanded=False)
                 
-            with st.expander("Dettaglio Ricerca Mercato (External)"):
-                st.markdown(result["researcher_output"])
+                # Tab per vedere i dettagli
+                tab1, tab2 = st.tabs(["📝 Insight Interni", "🌍 News Esterne"])
+                with tab1:
+                    st.info(agent_data["analyst_output"])
+                with tab2:
+                    st.success(agent_data["researcher_output"])
+                
+                # Report Finale
+                st.markdown("### 👔 Direttore Strategico")
+                st.markdown(f"""
+                <div class="report-box">
+                    {agent_data['final_report']}
+                </div>
+                """, unsafe_allow_html=True)
+                
+            else:
+                status_box.update(label="Errore Agenti", state="error")
+                st.error(agent_resp.text)
                 
         except Exception as e:
-            status_container.update(label="Errore negli Agenti", state="error")
-            st.error(f"Errore AI: {e}")
-            st.stop()
+            st.error(f"Errore critico: {e}")
 
-    # --- STEP 3: REPORT FINALE ---
-# --- STEP 3: REPORT FINALE ---
-    st.markdown("---")
-    st.header("📑 Report Strategico Finale")
-    
-    # MODIFICA QUI: Ho aggiunto 'color: #0f172a' per forzare il testo scuro
-    st.markdown(f"""
-    <div style="
-        background-color: #e8f4f8; 
-        color: #0f172a;
-        padding: 20px; 
-        border-radius: 10px; 
-        border: 1px solid #b3d7ff;
-        font-family: sans-serif;
-    ">
-        {result['final_report']}
-    </div>
-    """, unsafe_allow_html=True)
-    
 if __name__ == "__main__":
     main()

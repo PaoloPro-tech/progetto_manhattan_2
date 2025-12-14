@@ -1,13 +1,26 @@
-streamlit==1.32.0
-pandas==2.2.0
-numpy==1.26.0
-prophet==1.1.5
-plotly==5.19.0
-pydantic==2.6.0
-pydantic-settings==2.2.0
-langchain==0.1.10
-langgraph==0.0.26
-langchain-openai==0.0.8
-tavily-python==0.3.1
-python-dotenv==1.0.1
-faker==24.0.0
+# --- Core & Data ---
+pandas>=2.2.0
+numpy<2.0.0          # Prophet richiede numpy < 2 per stabilità
+python-dotenv
+pydantic>=2.7.0
+pydantic-settings
+
+# --- Forecasting ---
+prophet>=1.1.5
+plotly>=5.19.0
+
+# --- Web & API ---
+streamlit>=1.32.0
+watchdog
+fastapi>=0.110.0
+uvicorn>=0.27.0
+python-multipart
+
+# --- AI & LangChain Ecosystem (Allineati alla v0.3) ---
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-openai>=0.2.0
+langchain-tavily>=0.2.0
+langgraph>=0.2.0
+tavily-python>=0.5.0
