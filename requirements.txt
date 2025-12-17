@@ -26,3 +26,8 @@ plotly
 
 # --- Donwload PDF
 fpdf2
+pypdf
+
+# --- RAG / Vector DB ---
+chromadb
+tiktoken

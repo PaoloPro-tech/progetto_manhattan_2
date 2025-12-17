@@ -36,3 +36,12 @@ MANIFEST
 
 # Windows
 Thumbs.db
+
+# RAG vector store
+app/data/.rag/
+chroma_repo_rag/
+
+# env & secrets
+.env
+*.token
+
