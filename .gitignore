@@ -40,6 +40,7 @@ Thumbs.db
 # RAG vector store
 app/data/.rag/
 chroma_repo_rag/
+*.sqlite3
 
 # env & secrets
 .env
