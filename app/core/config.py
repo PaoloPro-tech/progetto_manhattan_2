@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     # RAG (Repo-based)
     RAG_PERSIST_DIR: str = "./app/data/.rag/chroma"
-    RAG_COLLECTION_NAME: str = "internal_repo"
+    RAG_COLLECTION_NAME: str = "internal_docs"
     RAG_TOP_K: int = 4
     RAG_REPO_ROOT: str = "."
 
