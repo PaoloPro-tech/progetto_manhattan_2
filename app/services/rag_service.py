@@ -6,9 +6,12 @@ class RAGService:
         self.persist_dir = persist_dir
         self.collection_name = collection_name
         self.top_k = top_k
+
         self._vs = Chroma(
             persist_directory=persist_dir,
-            embedding_function=OpenAIEmbeddings(),
+            embedding_function=OpenAIEmbeddings(
+                model="text-embedding-3-small"
+            ),
             collection_name=collection_name
         )
 
