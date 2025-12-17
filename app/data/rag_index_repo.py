@@ -47,7 +47,7 @@ def build_vectorstore(repo_root: str, persist_dir: str, collection_name: str) ->
 
 vs = Chroma.from_documents(
     chunks,
-    embedding=OpenAIEmbeddings(),
+    embedding=OpenAIEmbeddings(model="text-embedding-3-small"),
     persist_directory=persist_dir,
     collection_name=collection_name,
     collection_metadata={"hnsw:space": "cosine"},
