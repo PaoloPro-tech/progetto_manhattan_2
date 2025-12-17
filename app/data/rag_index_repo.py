@@ -10,10 +10,10 @@ EXCLUDE_SUBSTRINGS = [
 ]
 
 INCLUDE_GLOBS = [
-    "**/*.md", "**/*.txt",
-    "app/**/*.py",
-    "**/*.yaml", "**/*.yml", "**/*.json"
+    "docs/**/*.md", "docs/**/*.txt",
+    "docs/**/*.pdf",
 ]
+
 
 def load_repo_docs(repo_root: str) -> list[Document]:
     files: list[str] = []
