@@ -52,7 +52,6 @@ vs = Chroma.from_documents(
     collection_name=collection_name,
     collection_metadata={"hnsw:space": "cosine"},
 )
-    vs.persist()
 
 if __name__ == "__main__":
     repo_root = os.getenv("RAG_REPO_ROOT", ".")
