@@ -45,12 +45,13 @@ def build_vectorstore(repo_root: str, persist_dir: str, collection_name: str) ->
 
     os.makedirs(persist_dir, exist_ok=True)
 
-    vs = Chroma.from_documents(
-        chunks,
-        embedding=OpenAIEmbeddings(),
-        persist_directory=persist_dir,
-        collection_name=collection_name
-    )
+vs = Chroma.from_documents(
+    chunks,
+    embedding=OpenAIEmbeddings(),
+    persist_directory=persist_dir,
+    collection_name=collection_name,
+    collection_metadata={"hnsw:space": "cosine"},
+)
     vs.persist()
 
 if __name__ == "__main__":
