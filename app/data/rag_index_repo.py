@@ -40,7 +40,7 @@ def load_repo_docs(repo_root: str) -> list[Document]:
 
 def build_vectorstore(repo_root: str, persist_dir: str, collection_name: str) -> None:
     docs = load_repo_docs(repo_root)
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)
     chunks = splitter.split_documents(docs)
 
     os.makedirs(persist_dir, exist_ok=True)
