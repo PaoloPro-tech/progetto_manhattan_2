@@ -25,9 +25,13 @@ class AgentState(TypedDict):
     sector: str
     financial_metrics: dict  # Output di Prophet
 
+    # Input domanda/brief (serve per pilotare il RAG in modo corretto)
+    user_question: Optional[str]
+
     # Output degli agenti
     analyst_output: Optional[str]
-    internal_research_output: Optional[str]   # ✅ nuovo
+    internal_research_evidence: Optional[str]  # ✅ chunk grezzi con fonti
+    internal_research_output: Optional[str]    # ✅ sintesi citata
     researcher_output: Optional[str]
     final_report: Optional[str]
 
@@ -48,7 +52,6 @@ class AgentEngine:
         )
 
         # ✅ RAG interno (repo indicizzato in Chroma)
-        # Nota: se la directory/collection non esiste ancora, il nodo gestirà l'errore in modo "soft".
         self.rag = RAGService(
             persist_dir=settings.RAG_PERSIST_DIR,
             collection_name=settings.RAG_COLLECTION_NAME,
@@ -76,42 +79,64 @@ class AgentEngine:
         """Ricerca interna via RAG (repo indicizzato in Chroma)"""
         print(f"   ... 🏢 Ricerca interna (RAG) su {state['client_name']} ...")
 
+        # ✅ Usa la domanda reale per fare retrieval (non una query generica)
+        user_q = (state.get("user_question") or "").strip()
+
+        # Query ibrida: domanda reale + contesto cliente/settore
         query = (
-            f"{state['client_name']} {state['sector']}. "
-            f"Cerca informazioni interne rilevanti (progetti, note, offerte, rischi, punti di forza)."
+            f"DOMANDA:\n{user_q}\n\n"
+            f"CONTESTO:\nCliente: {state['client_name']}\nSettore: {state['sector']}\n\n"
+            "Cerca nei documenti interni informazioni pertinenti alla domanda. "
+            "Se la domanda cita un file o un tema specifico, privilegia quel contenuto."
         )
 
         # Proviamo a recuperare documenti dal vector store
         try:
             docs = self.rag.retrieve(query)
 
+            print(f"      RAG_PERSIST_DIR: {settings.RAG_PERSIST_DIR}")
+            print(f"      RAG_COLLECTION_NAME: {settings.RAG_COLLECTION_NAME}")
+            print(f"      RAG query: {user_q[:120] + ('...' if len(user_q) > 120 else '')}")
+            print(f"      RAG docs retrieved: {len(docs)}")
+
             if docs:
-                context = "\n\n".join(
+                evidence = "\n\n".join(
                     [f"[{d.metadata.get('source','unknown')}]\n{d.page_content}" for d in docs]
                 )
             else:
-                context = "NESSUN CONTENUTO RECUPERATO."
+                evidence = "NESSUN CONTENUTO RECUPERATO DAL RAG."
         except Exception as e:
             # Gestione “soft”: non blocca il workflow, ma informa nel report
-            context = (
+            evidence = (
                 "RICERCA INTERNA NON DISPONIBILE.\n"
                 f"Dettaglio errore: {str(e)}\n"
                 "Suggerimento: assicurati di aver eseguito l'indicizzazione (python -m app.data.rag_index_repo) "
                 "e che RAG_PERSIST_DIR punti alla directory corretta."
             )
 
+        # Sintesi “citata” basata SOLO sulle evidenze
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "Sei un ricercatore interno. Usa SOLO il contesto. Se non trovi dati, dillo chiaramente."),
-            ("user",
-             "DOMANDA:\n{q}\n\n"
-             "CONTESTO (con fonti tra []):\n{ctx}\n\n"
-             "Rispondi in italiano e cita sempre le fonti tra [] quando usi informazioni.")
+            (
+                "system",
+                "Sei un ricercatore interno. Usa SOLO il contesto fornito (EVIDENZE). "
+                "Se non trovi dati nelle evidenze, dillo chiaramente. "
+                "Quando usi informazioni, cita SEMPRE la fonte tra [] esattamente come fornita."
+            ),
+            (
+                "user",
+                "DOMANDA:\n{q}\n\n"
+                "EVIDENZE (con fonti tra []):\n{ev}\n\n"
+                "Scrivi una risposta in italiano, chiara e sintetica, con citazioni [] dove appropriato."
+            )
         ])
 
         chain = prompt | self.llm | StrOutputParser()
-        out = chain.invoke({"q": query, "ctx": context})
+        out = chain.invoke({"q": user_q or "(nessuna domanda fornita)", "ev": evidence})
 
-        return {"internal_research_output": out}
+        return {
+            "internal_research_evidence": evidence,
+            "internal_research_output": out
+        }
 
     def researcher_node(self, state: AgentState):
         """Il Ricercatore usa Tavily per cercare news"""
@@ -120,9 +145,7 @@ class AgentEngine:
         query = f"Latest business news and financial trends for {state['client_name']} in {state['sector']} sector"
 
         try:
-            # Invoca il tool di ricerca
             search_results = self.search_tool.invoke(query)
-            # Formatta i risultati
             content = "\n".join([f"- {res['content']} (Fonte: {res['url']})" for res in search_results])
         except Exception as e:
             content = f"Nessuna news trovata o errore API: {str(e)}"
@@ -140,28 +163,33 @@ class AgentEngine:
         """Il Direttore legge tutto e decide"""
         print("   ... 👔 Il Direttore sta scrivendo la strategia ...")
 
+        # Passiamo sia evidenze grezze sia sintesi interna
         prompt = ChatPromptTemplate.from_messages([
             ("system", DIRECTOR_SYSTEM_PROMPT),
             ("user", """
-            CLIENTE: {client}
+CLIENTE: {client}
 
-            REPORT ANALISTA (Dati Interni):
-            {analyst_doc}
+REPORT ANALISTA (Dati Interni):
+{analyst_doc}
 
-            REPORT RICERCA INTERNA (Repo RAG):
-            {internal_doc}
+EVIDENZE RICERCA INTERNA (Repo RAG - chunk grezzi):
+{internal_evidence}
 
-            REPORT RICERCATORE (News Esterne):
-            {researcher_doc}
+SINTESI RICERCA INTERNA (Repo RAG - citata):
+{internal_doc}
+
+REPORT RICERCATORE (News Esterne):
+{researcher_doc}
             """)
         ])
         chain = prompt | self.llm | StrOutputParser()
 
         final_report = chain.invoke({
             "client": state["client_name"],
-            "analyst_doc": state["analyst_output"],
-            "internal_doc": state["internal_research_output"],
-            "researcher_doc": state["researcher_output"]
+            "analyst_doc": state.get("analyst_output") or "",
+            "internal_evidence": state.get("internal_research_evidence") or "",
+            "internal_doc": state.get("internal_research_output") or "",
+            "researcher_doc": state.get("researcher_output") or ""
         })
 
         return {"final_report": final_report}
@@ -171,27 +199,32 @@ class AgentEngine:
         workflow = StateGraph(AgentState)
 
         workflow.add_node("analyst", self.analyst_node)
-        workflow.add_node("internal_researcher", self.internal_researcher_node)  # ✅ nuovo
+        workflow.add_node("internal_researcher", self.internal_researcher_node)
         workflow.add_node("researcher", self.researcher_node)
         workflow.add_node("director", self.director_node)
 
         workflow.set_entry_point("analyst")
-        workflow.add_edge("analyst", "internal_researcher")       # ✅ nuovo
-        workflow.add_edge("internal_researcher", "researcher")    # ✅ nuovo
+        workflow.add_edge("analyst", "internal_researcher")
+        workflow.add_edge("internal_researcher", "researcher")
         workflow.add_edge("researcher", "director")
         workflow.add_edge("director", END)
 
         return workflow.compile()
 
-    def run_analysis(self, client: str, sector: str, metrics: dict):
+    def run_analysis(self, client: str, sector: str, metrics: dict, user_question: Optional[str] = None):
         app = self.build_graph()
 
-        inputs = {
+        inputs: AgentState = {
             "client_name": client,
             "sector": sector,
             "financial_metrics": metrics,
+
+            # ✅ domanda/brief che guida il retrieval interno
+            "user_question": user_question or "",
+
             "analyst_output": None,
-            "internal_research_output": None,  # ✅ nuovo
+            "internal_research_evidence": None,
+            "internal_research_output": None,
             "researcher_output": None,
             "final_report": None
         }
@@ -200,27 +233,43 @@ class AgentEngine:
 
     def chat_with_director(self, user_question: str, context_report: str):
         """
-        Permette di fare Q&A sul report generato.
-        Usa il report finale come contesto per rispondere.
+        Q&A sul report generato + RAG live.
+        In questo modo il Direttore può rispondere anche su dettagli presenti nei documenti interni
+        ma non inclusi nel report finale.
         """
         print(f"   ... 💬 Chat in corso: {user_question} ...")
 
-        system_prompt = """
-        Sei il Direttore Strategico di Akkodis.
-        Hai appena redatto un report strategico per un cliente (che ti fornisco come contesto).
+        # ✅ RAG live sulla domanda
+        try:
+            docs = self.rag.retrieve(user_question)
+            if docs:
+                rag_evidence = "\n\n".join(
+                    [f"[{d.metadata.get('source','unknown')}]\n{d.page_content}" for d in docs]
+                )
+            else:
+                rag_evidence = "NESSUN CONTENUTO RECUPERATO DAL RAG."
+        except Exception as e:
+            rag_evidence = f"RAG non disponibile: {str(e)}"
 
-        L'Account Manager ti sta facendo domande di approfondimento.
-        Rispondi in modo professionale, sintetico e basandoti ESCLUSIVAMENTE sui dati del report.
-        Se la domanda è fuori contesto, rispondi che non hai dati a riguardo.
-        """
+        system_prompt = """
+Sei il Direttore Strategico.
+Regole:
+1) Se nelle EVIDENZE INTERNE (RAG) c'è materiale pertinente, usalo come fonte primaria e cita sempre le fonti tra [].
+2) Se NON ci sono evidenze interne pertinenti, dillo esplicitamente.
+3) Puoi usare il REPORT come contesto, ma non inventare dettagli non presenti in report o evidenze.
+Rispondi in italiano, professionale e sintetico.
+"""
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", system_prompt),
-            ("user", f"CONTESTO REPORT:\n{context_report}\n\nDOMANDA ACCOUNT MANAGER:\n{user_question}")
+            ("user",
+             "REPORT (contesto):\n{report}\n\n"
+             "EVIDENZE INTERNE (RAG):\n{rag}\n\n"
+             "DOMANDA:\n{q}\n")
         ])
 
         chain = prompt | self.llm | StrOutputParser()
-        response = chain.invoke({})
+        response = chain.invoke({"report": context_report, "rag": rag_evidence, "q": user_question})
 
         return response
 
@@ -236,8 +285,24 @@ if __name__ == "__main__":
     try:
         engine = AgentEngine()
         print("🚀 Avvio Simulazione Agenti...")
-        outcome = engine.run_analysis("Leonardo", "Aerospace", mock_metrics)
+
+        # ✅ Inserisci una domanda reale per testare l'aggancio del RAG
+        outcome = engine.run_analysis(
+            "Leonardo",
+            "Aerospace",
+            mock_metrics,
+            user_question="Nel documento interno sui progetti, qual è la timeline e i rischi principali?"
+        )
+
         print("\n=== REPORT FINALE ===")
         print(outcome["final_report"])
+
+        print("\n=== Q&A DIRETTORE (con RAG live) ===")
+        ans = engine.chat_with_director(
+            "Cosa dice il documento interno X riguardo ai rischi di consegna?",
+            outcome["final_report"] or ""
+        )
+        print(ans)
+
     except Exception as e:
         print(f"❌ Errore critico: {e}")
